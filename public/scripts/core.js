@@ -1,14 +1,10 @@
+"use strict";
+
 function createPalette(RGB6Bit) {
     "use strict";
-    var RGBAColours = RGB6Bit.map((RGB6Bit) => {
-        return new Uint8Array(
-            [
-                RGB6Bit[0] << 2 | RGB6Bit[0] >> 4,
-                RGB6Bit[1] << 2 | RGB6Bit[1] >> 4,
-                RGB6Bit[2] << 2 | RGB6Bit[2] >> 4,
-                255
-            ]
-        );
+
+    var RGBAColours = RGB6Bit.map(function (RGB6Bit) {
+        return new Uint8Array([RGB6Bit[0] << 2 | RGB6Bit[0] >> 4, RGB6Bit[1] << 2 | RGB6Bit[1] >> 4, RGB6Bit[2] << 2 | RGB6Bit[2] >> 4, 255]);
     });
     var foreground = 7;
     var background = 0;
@@ -27,12 +23,12 @@ function createPalette(RGB6Bit) {
 
     function setForegroundColour(newForeground) {
         foreground = newForeground;
-        document.dispatchEvent(new CustomEvent("onForegroundChange", {"detail": foreground}));
+        document.dispatchEvent(new CustomEvent("onForegroundChange", { "detail": foreground }));
     }
 
     function setBackgroundColour(newBackground) {
         background = newBackground;
-        document.dispatchEvent(new CustomEvent("onBackgroundChange", {"detail": background}));
+        document.dispatchEvent(new CustomEvent("onBackgroundChange", { "detail": background }));
     }
 
     return {
@@ -46,28 +42,13 @@ function createPalette(RGB6Bit) {
 
 function createDefaultPalette() {
     "use strict";
-    return createPalette([
-        [0, 0, 0],
-        [0, 0, 42],
-        [0, 42, 0],
-        [0, 42, 42],
-        [42, 0, 0],
-        [42, 0, 42],
-        [42, 21, 0],
-        [42, 42, 42],
-        [21, 21, 21],
-        [21, 21, 63],
-        [21, 63, 21],
-        [21, 63, 63],
-        [63, 21, 21],
-        [63, 21, 63],
-        [63, 63, 21],
-        [63, 63, 63]
-    ]);
+
+    return createPalette([[0, 0, 0], [0, 0, 42], [0, 42, 0], [0, 42, 42], [42, 0, 0], [42, 0, 42], [42, 21, 0], [42, 42, 42], [21, 21, 21], [21, 21, 63], [21, 63, 21], [21, 63, 63], [63, 21, 21], [63, 21, 63], [63, 63, 21], [63, 63, 63]]);
 }
 
 function createPalettePreview(canvas) {
     "use strict";
+
     var imageData;
 
     function updatePreview() {
@@ -100,6 +81,7 @@ function createPalettePreview(canvas) {
 
 function createPalettePicker(canvas) {
     "use strict";
+
     var imageData = [];
 
     function updateColor(index) {
@@ -109,7 +91,7 @@ function createPalettePicker(canvas) {
                 imageData[index].data.set(colour, i);
             }
         }
-        canvas.getContext("2d").putImageData(imageData[index], (index > 7) ? (canvas.width / 2) : 0, (index % 8) * imageData[index].height);
+        canvas.getContext("2d").putImageData(imageData[index], index > 7 ? canvas.width / 2 : 0, index % 8 * imageData[index].height);
     }
 
     function updatePalette() {
@@ -122,7 +104,7 @@ function createPalettePicker(canvas) {
         var rect = canvas.getBoundingClientRect();
         var x = Math.floor((evt.clientX - rect.left) / (canvas.width / 2));
         var y = Math.floor((evt.clientY - rect.top) / (canvas.height / 8));
-        var colourIndex = y + ((x === 0) ? 0 : 8);
+        var colourIndex = y + (x === 0 ? 0 : 8);
         if (evt.ctrlKey === false && evt.which != 3) {
             palette.setForegroundColour(colourIndex);
         } else {
@@ -135,7 +117,7 @@ function createPalettePicker(canvas) {
     }
 
     function keydown(evt) {
-        var keyCode = (evt.keyCode || evt.which);
+        var keyCode = evt.keyCode || evt.which;
         if (keyCode >= 48 && keyCode <= 55) {
             var num = keyCode - 48;
             if (evt.ctrlKey === true) {
@@ -153,38 +135,38 @@ function createPalettePicker(canvas) {
                     palette.setBackgroundColour(num);
                 }
             }
-        } else if (keyCode >= 37 && keyCode <= 40 && evt.ctrlKey === true){
+        } else if (keyCode >= 37 && keyCode <= 40 && evt.ctrlKey === true) {
             evt.preventDefault();
-            switch(keyCode) {
-            case 37:
-                var colour = palette.getBackgroundColour();
-                colour = (colour === 0) ? 15 : (colour - 1);
-                palette.setBackgroundColour(colour);
-                break;
-            case 38:
-                var colour = palette.getForegroundColour();
-                colour = (colour === 0) ? 15 : (colour - 1);
-                palette.setForegroundColour(colour);
-                break;
-            case 39:
-                var colour = palette.getBackgroundColour();
-                colour = (colour === 15) ? 0 : (colour + 1);
-                palette.setBackgroundColour(colour);
-                break;
-            case 40:
-                var colour = palette.getForegroundColour();
-                colour = (colour === 15) ? 0 : (colour + 1);
-                palette.setForegroundColour(colour);
-                break;
-            default:
-                break;
+            switch (keyCode) {
+                case 37:
+                    var colour = palette.getBackgroundColour();
+                    colour = colour === 0 ? 15 : colour - 1;
+                    palette.setBackgroundColour(colour);
+                    break;
+                case 38:
+                    var colour = palette.getForegroundColour();
+                    colour = colour === 0 ? 15 : colour - 1;
+                    palette.setForegroundColour(colour);
+                    break;
+                case 39:
+                    var colour = palette.getBackgroundColour();
+                    colour = colour === 15 ? 0 : colour + 1;
+                    palette.setBackgroundColour(colour);
+                    break;
+                case 40:
+                    var colour = palette.getForegroundColour();
+                    colour = colour === 15 ? 0 : colour + 1;
+                    palette.setForegroundColour(colour);
+                    break;
+                default:
+                    break;
             }
         }
-    }   
+    }
 
     updatePalette();
     canvas.addEventListener("mousedown", mouseDown);
-    canvas.addEventListener("contextmenu", (evt) => {
+    canvas.addEventListener("contextmenu", function (evt) {
         evt.preventDefault();
     });
     document.addEventListener("keydown", keydown);
@@ -192,15 +174,16 @@ function createPalettePicker(canvas) {
 
 function loadImageAndGetImageData(url, callback) {
     "use strict";
+
     var imgElement = new Image();
-    imgElement.addEventListener("load", () => {
+    imgElement.addEventListener("load", function () {
         var canvas = createCanvas(imgElement.width, imgElement.height);
         var ctx = canvas.getContext("2d");
         ctx.drawImage(imgElement, 0, 0);
         var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         callback(imageData);
     });
-    imgElement.addEventListener("error", () => {
+    imgElement.addEventListener("error", function () {
         callback(undefined);
     });
     imgElement.src = url;
@@ -208,6 +191,7 @@ function loadImageAndGetImageData(url, callback) {
 
 function loadFontFromImage(fontName, letterSpacing, palette, callback) {
     "use strict";
+
     var fontData = {};
     var fontGlyphs;
     var alphaGlyphs;
@@ -216,11 +200,11 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
     function parseFontData(imageData) {
         var fontWidth = imageData.width / 16;
         var fontHeight = imageData.height / 16;
-        if ((fontWidth === 8) && (imageData.height % 16 === 0) && (fontHeight >= 1 && fontHeight <= 32)) {
+        if (fontWidth === 8 && imageData.height % 16 === 0 && fontHeight >= 1 && fontHeight <= 32) {
             var data = new Uint8Array(fontWidth * fontHeight * 256 / 8);
             var k = 0;
             for (var value = 0; value < 256; value += 1) {
-                var x = (value % 16) * fontWidth;
+                var x = value % 16 * fontWidth;
                 var y = Math.floor(value / 16) * fontHeight;
                 var pos = (y * imageData.width + x) * 4;
                 var i = 0;
@@ -253,7 +237,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
         var bits = new Uint8Array(fontData.width * fontData.height * 256);
         for (var i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
             for (var j = 7; j >= 0; j -= 1, k += 1) {
-                bits[k] = (fontData.data[i] >> j) & 1;
+                bits[k] = fontData.data[i] >> j & 1;
             }
         }
         fontGlyphs = new Array(16);
@@ -264,7 +248,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
                 for (var charCode = 0; charCode < 256; charCode++) {
                     fontGlyphs[foreground][background][charCode] = ctx.createImageData(fontData.width, fontData.height);
                     for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
-                        var colour = palette.getRGBAColour((bits[j] === 1) ? foreground : background);
+                        var colour = palette.getRGBAColour(bits[j] === 1 ? foreground : background);
                         fontGlyphs[foreground][background][charCode].data.set(colour, i * 4);
                     }
                 }
@@ -315,7 +299,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
         if (newLetterSpacing !== letterSpacing) {
             generateNewFontGlyphs();
             letterSpacing = newLetterSpacing;
-            document.dispatchEvent(new CustomEvent("onLetterSpacingChange", {"detail": letterSpacing}));
+            document.dispatchEvent(new CustomEvent("onLetterSpacingChange", { "detail": letterSpacing }));
         }
     }
 
@@ -323,7 +307,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
         return letterSpacing;
     }
 
-    loadImageAndGetImageData("fonts/" + fontName + ".png", (imageData) => {
+    loadImageAndGetImageData("fonts/" + fontName + ".png", function (imageData) {
         if (imageData === undefined) {
             callback(false);
         } else {
@@ -374,6 +358,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 
 function createTextArtCanvas(canvasContainer, callback) {
     "use strict";
+
     var columns = 80,
         rows = 25,
         iceColours = false,
@@ -397,7 +382,7 @@ function createTextArtCanvas(canvasContainer, callback) {
         var contextIndex = Math.floor(y / 25);
         var contextY = y % 25;
         var charCode = imageData[dataIndex] >> 8;
-        var background = (imageData[dataIndex] >> 4) & 15;
+        var background = imageData[dataIndex] >> 4 & 15;
         var foreground = imageData[dataIndex] & 15;
         var shifted = background >= 8;
         if (shifted === true) {
@@ -410,12 +395,11 @@ function createTextArtCanvas(canvasContainer, callback) {
         }
     }
 
-
     function redrawGlyph(index, x, y) {
         var contextIndex = Math.floor(y / 25);
         var contextY = y % 25;
         var charCode = imageData[index] >> 8;
-        var background = (imageData[index] >> 4) & 15;
+        var background = imageData[index] >> 4 & 15;
         var foreground = imageData[index] & 15;
         if (iceColours === true) {
             font.draw(charCode, foreground, background, ctxs[contextIndex], x, contextY);
@@ -455,7 +439,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
     function createCanvases() {
         if (canvases !== undefined) {
-            canvases.forEach((canvas) => {
+            canvases.forEach(function (canvas) {
                 canvasContainer.removeChild(canvas);
             });
         }
@@ -517,19 +501,19 @@ function createTextArtCanvas(canvasContainer, callback) {
     }
 
     function setFont(fontName, callback) {
-        font = loadFontFromImage(fontName, font.getLetterSpacing(), palette, (success) => {
+        font = loadFontFromImage(fontName, font.getLetterSpacing(), palette, function (success) {
             createCanvases();
             redrawEntireImage();
-            document.dispatchEvent(new CustomEvent("onFontChange", {"detail": fontName}));
+            document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
             callback();
         });
     }
 
     function resize(newColumnValue, newRowValue) {
-        if ((newColumnValue !== columns || newRowValue !== rows) && (newColumnValue > 0 && newRowValue > 0)) {
+        if ((newColumnValue !== columns || newRowValue !== rows) && newColumnValue > 0 && newRowValue > 0) {
             clearUndos();
-            var maxColumn = (columns > newColumnValue) ? newColumnValue : columns;
-            var maxRow = (rows > newRowValue) ? newRowValue : rows;
+            var maxColumn = columns > newColumnValue ? newColumnValue : columns;
+            var maxRow = rows > newRowValue ? newRowValue : rows;
             var newImageData = new Uint16Array(newColumnValue * newRowValue);
             for (var y = 0; y < maxRow; y++) {
                 for (var x = 0; x < maxColumn; x++) {
@@ -540,7 +524,7 @@ function createTextArtCanvas(canvasContainer, callback) {
             columns = newColumnValue;
             rows = newRowValue;
             createCanvases();
-            document.dispatchEvent(new CustomEvent("onTextCanvasSizeChange", {"detail": {"columns": columns, "rows": rows}}));
+            document.dispatchEvent(new CustomEvent("onTextCanvasSizeChange", { "detail": { "columns": columns, "rows": rows } }));
         }
     }
 
@@ -564,9 +548,9 @@ function createTextArtCanvas(canvasContainer, callback) {
         var completeCanvas = createCanvas(font.getWidth() * columns, font.getHeight() * rows);
         var y = 0;
         var ctx = completeCanvas.getContext("2d");
-        ((iceColours === true) ? canvases : offBlinkCanvases).forEach((canvas) => {
-                ctx.drawImage(canvas, 0, y);
-                y += canvas.height;
+        (iceColours === true ? canvases : offBlinkCanvases).forEach(function (canvas) {
+            ctx.drawImage(canvas, 0, y);
+            y += canvas.height;
         });
         return completeCanvas;
     }
@@ -611,7 +595,7 @@ function createTextArtCanvas(canvasContainer, callback) {
     }
 
     palette = createDefaultPalette();
-    font = loadFontFromImage("CP437 8x16", false, palette, (success) => {
+    font = loadFontFromImage("CP437 8x16", false, palette, function (success) {
         createCanvases();
         updateTimer();
         callback();
@@ -627,7 +611,7 @@ function createTextArtCanvas(canvasContainer, callback) {
         var index = y * columns + x;
         var charCode = imageData[index] >> 8;
         var foregroundColour = imageData[index] & 15;
-        var backgroundColour = (imageData[index] >> 4) & 15;
+        var backgroundColour = imageData[index] >> 4 & 15;
         return {
             "x": x,
             "y": y,
@@ -641,7 +625,7 @@ function createTextArtCanvas(canvasContainer, callback) {
         var textY = Math.floor(y / 2);
         var index = textY * columns + x;
         var foreground = imageData[index] & 15;
-        var background = (imageData[index] >> 4) & 15;
+        var background = imageData[index] >> 4 & 15;
         var upperBlockColour = 0;
         var lowerBlockColour = 0;
         var isBlocky = false;
@@ -649,46 +633,46 @@ function createTextArtCanvas(canvasContainer, callback) {
         var leftBlockColour;
         var rightBlockColour;
         switch (imageData[index] >> 8) {
-        case 0:
-        case 32:
-        case 255:
-            upperBlockColour = background;
-            lowerBlockColour = background;
-            isBlocky = true;
-            break;
-        case 220:
-            upperBlockColour = background;
-            lowerBlockColour = foreground;
-            isBlocky = true;
-            break;
-        case 221:
-            isVerticalBlocky = true;
-            leftBlockColour = foreground;
-            rightBlockColour = background;
-            break;
-        case 222:
-            isVerticalBlocky = true;
-            leftBlockColour = background;
-            rightBlockColour = foreground;
-            break;
-        case 223:
-            upperBlockColour = foreground;
-            lowerBlockColour = background;
-            isBlocky = true;
-            break;
-        case 219:
-            upperBlockColour = foreground;
-            lowerBlockColour = foreground;
-            isBlocky = true;
-            break;
-        default:
-            if (foreground === background) {
+            case 0:
+            case 32:
+            case 255:
+                upperBlockColour = background;
+                lowerBlockColour = background;
                 isBlocky = true;
+                break;
+            case 220:
+                upperBlockColour = background;
+                lowerBlockColour = foreground;
+                isBlocky = true;
+                break;
+            case 221:
+                isVerticalBlocky = true;
+                leftBlockColour = foreground;
+                rightBlockColour = background;
+                break;
+            case 222:
+                isVerticalBlocky = true;
+                leftBlockColour = background;
+                rightBlockColour = foreground;
+                break;
+            case 223:
+                upperBlockColour = foreground;
+                lowerBlockColour = background;
+                isBlocky = true;
+                break;
+            case 219:
                 upperBlockColour = foreground;
                 lowerBlockColour = foreground;
-            } else {
-                isBlocky = false;
-            }
+                isBlocky = true;
+                break;
+            default:
+                if (foreground === background) {
+                    isBlocky = true;
+                    upperBlockColour = foreground;
+                    lowerBlockColour = foreground;
+                } else {
+                    isBlocky = false;
+                }
         }
         return {
             "x": x,
@@ -708,7 +692,7 @@ function createTextArtCanvas(canvasContainer, callback) {
         var halfBlockY = y % 2;
         var charCode = imageData[index] >> 8;
         var currentForeground = imageData[index] & 15;
-        var currentBackground = (imageData[index] >> 4) & 15;
+        var currentBackground = imageData[index] >> 4 & 15;
         if (charCode === 219) {
             if (currentForeground !== foreground) {
                 if (halfBlockY === 0) {
@@ -762,31 +746,31 @@ function createTextArtCanvas(canvasContainer, callback) {
         callback(x, y, halfBlockY);
     }
 
-    canvasContainer.addEventListener("mousedown", (evt) => {
+    canvasContainer.addEventListener("mousedown", function (evt) {
         mouseButton = true;
-        getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY) => {
+        getXYCoords(evt.clientX, evt.clientY, function (x, y, halfBlockY) {
             if (evt.altKey === true) {
                 sampleTool.sample(x, halfBlockY);
             } else {
-                document.dispatchEvent(new CustomEvent("onTextCanvasDown", {"detail": {"x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true)}}));
+                document.dispatchEvent(new CustomEvent("onTextCanvasDown", { "detail": { "x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": evt.button === 0 && evt.ctrlKey !== true, "rightMouseButton": evt.button === 2 || evt.ctrlKey === true } }));
             }
         });
     });
 
-    canvasContainer.addEventListener("contextmenu", (evt) => {
+    canvasContainer.addEventListener("contextmenu", function (evt) {
         evt.preventDefault();
     });
 
-    canvasContainer.addEventListener("mousemove", (evt) => {
+    canvasContainer.addEventListener("mousemove", function (evt) {
         evt.preventDefault();
         if (mouseButton === true) {
-            getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY) => {
-                document.dispatchEvent(new CustomEvent("onTextCanvasDrag", {"detail": {"x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true)}}));
+            getXYCoords(evt.clientX, evt.clientY, function (x, y, halfBlockY) {
+                document.dispatchEvent(new CustomEvent("onTextCanvasDrag", { "detail": { "x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": evt.button === 0 && evt.ctrlKey !== true, "rightMouseButton": evt.button === 2 || evt.ctrlKey === true } }));
             });
         }
     });
 
-    canvasContainer.addEventListener("mouseup", (evt) => {
+    canvasContainer.addEventListener("mouseup", function (evt) {
         evt.preventDefault();
         if (mouseButton === true) {
             mouseButton = false;
@@ -794,7 +778,7 @@ function createTextArtCanvas(canvasContainer, callback) {
         }
     });
 
-    canvasContainer.addEventListener("mouseenter", (evt) => {
+    canvasContainer.addEventListener("mouseenter", function (evt) {
         evt.preventDefault();
         if (mouseButton === true && (evt.which === 0 || evt.buttons === 0)) {
             mouseButton = false;
@@ -862,53 +846,53 @@ function createTextArtCanvas(canvasContainer, callback) {
     }
 
     function optimiseBlocks(blocks) {
-        blocks.forEach((block) => {
+        blocks.forEach(function (block) {
             var index = block[0];
             var attribute = imageData[index];
-            var background = (attribute >> 4) & 15;
+            var background = attribute >> 4 & 15;
             if (background >= 8) {
                 switch (attribute >> 8) {
-                case 0:
-                case 32:
-                case 255:
-                    draw(index, 219, background, 0, block[1], block[2]);
-                    break;
-                case 219:
-                    draw(index, 219, (attribute & 15), 0, block[1], block[2]);
-                    break;
-                case 221:
-                    var foreground = (attribute & 15);
-                    if (foreground < 8) {
-                        draw(index, 222, background, foreground, block[1], block[2]);
-                    }
-                    break;
-                case 222:
-                    var foreground = (attribute & 15);
-                    if (foreground < 8) {
-                        draw(index, 221, background, foreground, block[1], block[2]);
-                    }
-                    break;
-                case 223:
-                    var foreground = (attribute & 15);
-                    if (foreground < 8) {
-                        draw(index, 220, background, foreground, block[1], block[2]);
-                    }
-                    break;
-                case 220:
-                    var foreground = (attribute & 15);
-                    if (foreground < 8) {
-                        draw(index, 223, background, foreground, block[1], block[2]);
-                    }
-                    break;
-                default:
-                    break;
+                    case 0:
+                    case 32:
+                    case 255:
+                        draw(index, 219, background, 0, block[1], block[2]);
+                        break;
+                    case 219:
+                        draw(index, 219, attribute & 15, 0, block[1], block[2]);
+                        break;
+                    case 221:
+                        var foreground = attribute & 15;
+                        if (foreground < 8) {
+                            draw(index, 222, background, foreground, block[1], block[2]);
+                        }
+                        break;
+                    case 222:
+                        var foreground = attribute & 15;
+                        if (foreground < 8) {
+                            draw(index, 221, background, foreground, block[1], block[2]);
+                        }
+                        break;
+                    case 223:
+                        var foreground = attribute & 15;
+                        if (foreground < 8) {
+                            draw(index, 220, background, foreground, block[1], block[2]);
+                        }
+                        break;
+                    case 220:
+                        var foreground = attribute & 15;
+                        if (foreground < 8) {
+                            draw(index, 223, background, foreground, block[1], block[2]);
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
         });
     }
 
     function drawBlocks(blocks) {
-        blocks.forEach((block) => {
+        blocks.forEach(function (block) {
             if (iceColours === false) {
                 updateBeforeBlinkFlip(block[1], block[2]);
             }
@@ -985,14 +969,14 @@ function createTextArtCanvas(canvasContainer, callback) {
             for (var py = 0; py < maxHeight; py++) {
                 for (var px = 0; px < maxWidth; px++) {
                     var attrib = area.data[py * area.width + px];
-                    draw(attrib >> 8, attrib & 15, (attrib >> 4) & 15, x + px, y + py);
+                    draw(attrib >> 8, attrib & 15, attrib >> 4 & 15, x + px, y + py);
                 }
             }
         });
     }
 
     function quickDraw(blocks) {
-        blocks.forEach((block) => {
+        blocks.forEach(function (block) {
             if (imageData[block[0]] !== block[1]) {
                 imageData[block[0]] = block[1];
                 if (iceColours === false) {

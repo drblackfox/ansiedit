@@ -1,5 +1,8 @@
+"use strict";
+
 function createSettingToggle(divButton, getter, setter) {
     "use strict";
+
     var currentSetting;
 
     function update() {
@@ -26,8 +29,9 @@ function createSettingToggle(divButton, getter, setter) {
     };
 }
 
-var Toolbar = (function () {
+var Toolbar = function () {
     "use strict";
+
     var currentButton;
     var currentOnBlur;
 
@@ -43,12 +47,12 @@ var Toolbar = (function () {
                 divButton.classList.add("toolbar-displayed");
                 currentButton = divButton;
                 currentOnBlur = onBlur;
-                if (onFocus  !== undefined) {
+                if (onFocus !== undefined) {
                     onFocus();
                 }
             }
         }
-        divButton.addEventListener("click", (evt) => {
+        divButton.addEventListener("click", function (evt) {
             evt.preventDefault();
             enable();
         });
@@ -60,12 +64,13 @@ var Toolbar = (function () {
     return {
         "add": add
     };
-}());
+}();
 
 function onReturn(divElement, divTarget) {
     "use strict";
-    divElement.addEventListener("keypress", (evt) => {
-        var keyCode = (evt.keyCode || evt.which);
+
+    divElement.addEventListener("keypress", function (evt) {
+        var keyCode = evt.keyCode || evt.which;
         if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false && keyCode === 13) {
             evt.preventDefault();
             evt.stopPropagation();
@@ -76,7 +81,8 @@ function onReturn(divElement, divTarget) {
 
 function onClick(divElement, func) {
     "use strict";
-    divElement.addEventListener("click", (evt) => {
+
+    divElement.addEventListener("click", function (evt) {
         evt.preventDefault();
         func();
     });
@@ -84,7 +90,8 @@ function onClick(divElement, func) {
 
 function onFileChange(divElement, func) {
     "use strict";
-    divElement.addEventListener("change", (evt) => {
+
+    divElement.addEventListener("change", function (evt) {
         if (evt.target.files.length > 0) {
             func(evt.target.files[0]);
         }
@@ -93,15 +100,17 @@ function onFileChange(divElement, func) {
 
 function onSelectChange(divElement, func) {
     "use strict";
-    divElement.addEventListener("change", (evt) => {
+
+    divElement.addEventListener("change", function (evt) {
         func(divElement.value);
     });
 }
 
 function createPositionInfo(divElement) {
     "use strict";
+
     function update(x, y) {
-        divElement.textContent = (x + 1) + ", " + (y + 1);
+        divElement.textContent = x + 1 + ", " + (y + 1);
     }
 
     return {
@@ -111,21 +120,24 @@ function createPositionInfo(divElement) {
 
 function showOverlay(divElement) {
     "use strict";
+
     divElement.classList.add("enabled");
 }
 
 function hideOverlay(divElement) {
     "use strict";
+
     divElement.classList.remove("enabled");
 }
 
 function undoAndRedo(evt) {
     "use strict";
-    var keyCode = (evt.keyCode || evt.which);
-    if ((evt.ctrlKey === true || (evt.metaKey === true && evt.shiftKey === false)) && keyCode === 90) {
+
+    var keyCode = evt.keyCode || evt.which;
+    if ((evt.ctrlKey === true || evt.metaKey === true && evt.shiftKey === false) && keyCode === 90) {
         evt.preventDefault();
         textArtCanvas.undo();
-    } else if ((evt.ctrlKey === true && evt.keyCode === 89) || (evt.metaKey ===true && evt.shiftKey === true && keyCode === 90)) {
+    } else if (evt.ctrlKey === true && evt.keyCode === 89 || evt.metaKey === true && evt.shiftKey === true && keyCode === 90) {
         evt.preventDefault();
         textArtCanvas.redo();
     }
@@ -133,6 +145,7 @@ function undoAndRedo(evt) {
 
 function createTitleHandler(inputElement, onFocusCallback, onBlurCallback) {
     "use strict";
+
     function updateTitle() {
         document.title = inputElement.value + " - ANSiEdit";
     }
@@ -147,7 +160,7 @@ function createTitleHandler(inputElement, onFocusCallback, onBlurCallback) {
     }
 
     function keyPress(evt) {
-        var keyCode = (evt.keyCode || evt.which);
+        var keyCode = evt.keyCode || evt.which;
         if (keyCode === 13) {
             evt.preventDefault();
             evt.stopPropagation();
@@ -185,11 +198,12 @@ function createTitleHandler(inputElement, onFocusCallback, onBlurCallback) {
 
 function createPaintShortcuts(keyPair) {
     "use strict";
+
     var ignored = false;
 
     function keyDown(evt) {
         if (ignored === false) {
-            var keyCode = (evt.keyCode || evt.which);
+            var keyCode = evt.keyCode || evt.which;
             if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
                 if (keyCode >= 48 && keyCode <= 55) {
                     var colour = keyCode - 48;
@@ -214,7 +228,7 @@ function createPaintShortcuts(keyPair) {
 
     function keyDownWithCtrl(evt) {
         if (ignored === false) {
-            var keyCode = (evt.keyCode || evt.which);
+            var keyCode = evt.keyCode || evt.which;
             if (evt.ctrlKey === true && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
                 var charCode = String.fromCharCode(keyCode);
                 if (keyPair[charCode] !== undefined) {
@@ -257,6 +271,7 @@ function createPaintShortcuts(keyPair) {
 
 function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoClick) {
     "use strict";
+
     var divContainer = document.createElement("DIV");
     divContainer.classList.add("toggle-button-container");
     var stateOne = document.createElement("DIV");
@@ -284,12 +299,12 @@ function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoC
         stateOne.classList.remove("enabled");
     }
 
-    stateOne.addEventListener("click", (evt) => {
+    stateOne.addEventListener("click", function (evt) {
         setStateOne();
         stateOneClick();
     });
 
-    stateTwo.addEventListener("click", (evt) => {
+    stateTwo.addEventListener("click", function (evt) {
         setStateTwo();
         stateTwoClick();
     });
@@ -303,6 +318,7 @@ function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoC
 
 function createGrid(divElement) {
     "use strict";
+
     var canvases = [];
     var enabled = false;
 
@@ -357,7 +373,7 @@ function createGrid(divElement) {
     }
 
     function resize() {
-        canvases.forEach((canvas) => {
+        canvases.forEach(function (canvas) {
             divElement.removeChild(canvas);
         });
         createGrid();
@@ -392,6 +408,7 @@ function createGrid(divElement) {
 
 function createToolPreview(divElement) {
     "use strict";
+
     var canvases = [];
     var ctxs = [];
 
@@ -414,13 +431,13 @@ function createToolPreview(divElement) {
             canvases.push(canvas);
             ctxs.push(canvas.getContext("2d"));
         }
-        canvases.forEach((canvas) => {
+        canvases.forEach(function (canvas) {
             divElement.appendChild(canvas);
         });
     }
 
     function resize() {
-        canvases.forEach((canvas) => {
+        canvases.forEach(function (canvas) {
             divElement.removeChild(canvas);
         });
         createCanvases();
@@ -431,7 +448,7 @@ function createToolPreview(divElement) {
         var textY = Math.floor(y / 2);
         var ctxIndex = Math.floor(textY / 25);
         if (ctxIndex >= 0 && ctxIndex < ctxs.length) {
-            font.drawWithAlpha((halfBlockY === 0) ? 223 : 220, foreground, ctxs[ctxIndex], x, textY % 25);
+            font.drawWithAlpha(halfBlockY === 0 ? 223 : 220, foreground, ctxs[ctxIndex], x, textY % 25);
         }
     }
 
@@ -451,6 +468,6 @@ function createToolPreview(divElement) {
 
     return {
         "clear": clear,
-        "drawHalfBlock": drawHalfBlock,
+        "drawHalfBlock": drawHalfBlock
     };
 }

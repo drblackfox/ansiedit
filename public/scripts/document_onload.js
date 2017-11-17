@@ -1,3 +1,5 @@
+"use strict";
+
 var worker;
 var title;
 var palette;
@@ -13,26 +15,29 @@ var sampleTool;
 
 function $(divName) {
     "use strict";
+
     return document.getElementById(divName);
 }
 
 function createCanvas(width, height) {
     "use strict";
+
     var canvas = document.createElement("CANVAS");
     canvas.width = width;
     canvas.height = height;
     return canvas;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
     "use strict";
+
     pasteTool = createPasteTool($("cut"), $("copy"), $("paste"), $("delete"));
     positionInfo = createPositionInfo($("position-info"));
-    textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
+    textArtCanvas = createTextArtCanvas($("canvas-container"), function () {
         selectionCursor = createSelectionCursor($("canvas-container"));
         cursor = createCursor($("canvas-container"));
         document.addEventListener("keydown", undoAndRedo);
-        onClick($("new"), () => {
+        onClick($("new"), function () {
             if (confirm("All changes will be lost. Are you sure?") === true) {
                 textArtCanvas.clear();
                 $("sauce-title").value = "";
@@ -40,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 $("sauce-author").value = "";
             }
         });
-        onClick($("open"), () => {
+        onClick($("open"), function () {
             showOverlay($("open-overlay"));
         });
         onClick($("save-ansi"), Save.ans);
@@ -55,13 +60,13 @@ document.addEventListener("DOMContentLoaded", () => {
         var palettePreview = createPalettePreview($("palette-preview"));
         var palettePicker = createPalettePicker($("palette-picker"));
         var iceColoursToggle = createSettingToggle($("ice-colors-toggle"), textArtCanvas.getIceColours, textArtCanvas.setIceColours);
-        var letterSpacingToggle = createSettingToggle($("letter-spacing-toggle"), () => {
+        var letterSpacingToggle = createSettingToggle($("letter-spacing-toggle"), function () {
             return font.getLetterSpacing();
-        }, (newLetterSpacing) => {
+        }, function (newLetterSpacing) {
             font.setLetterSpacing(newLetterSpacing);
         });
-        onFileChange($("open-file"), (file) => {
-            Load.file(file, (columns, rows, imageData, iceColours, letterSpacing) => {
+        onFileChange($("open-file"), function (file) {
+            Load.file(file, function (columns, rows, imageData, iceColours, letterSpacing) {
                 var indexOfPeriod = file.name.lastIndexOf(".");
                 if (indexOfPeriod !== -1) {
                     title.setName(file.name.substr(0, indexOfPeriod));
@@ -75,10 +80,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 $("open-file").value = "";
             });
         });
-        onClick($("open-cancel"), () => {
+        onClick($("open-cancel"), function () {
             hideOverlay($("open-overlay"));
         });
-        onClick($("edit-sauce"), () => {
+        onClick($("edit-sauce"), function () {
             showOverlay($("sauce-overlay"));
             keyboard.ignore();
             paintShortcuts.ignore();
@@ -86,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
             freestyle.ignore();
             characterBrush.ignore();
         });
-        onClick($("sauce-done"), () => {
+        onClick($("sauce-done"), function () {
             hideOverlay($("sauce-overlay"));
             keyboard.unignore();
             paintShortcuts.unignore();
@@ -106,19 +111,19 @@ document.addEventListener("DOMContentLoaded", () => {
             "G": $("grid-toggle")
         });
         var keyboard = createKeyboardController();
-        Toolbar.add($("keyboard"), () => {
+        Toolbar.add($("keyboard"), function () {
             paintShortcuts.disable();
             keyboard.enable();
-        }, () => {
+        }, function () {
             paintShortcuts.enable();
             keyboard.disable();
         }).enable();
-        title = createTitleHandler($("artwork-title"), () => {
+        title = createTitleHandler($("artwork-title"), function () {
             keyboard.ignore();
             paintShortcuts.ignore();
             freestyle.ignore();
             characterBrush.ignore();
-        }, () => {
+        }, function () {
             keyboard.unignore();
             paintShortcuts.unignore();
             freestyle.unignore();
@@ -126,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         onClick($("undo"), textArtCanvas.undo);
         onClick($("redo"), textArtCanvas.redo);
-        onClick($("resize"), () => {
+        onClick($("resize"), function () {
             showOverlay($("resize-overlay"));
             $("columns-input").value = textArtCanvas.getColumns();
             $("rows-input").value = textArtCanvas.getRows();
@@ -136,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
             characterBrush.ignore();
             $("columns-input").focus();
         });
-        onClick($("resize-apply"), () => {
+        onClick($("resize-apply"), function () {
             var columnsValue = parseInt($("columns-input").value, 10);
             var rowsValue = parseInt($("rows-input").value, 10);
             if (!isNaN(columnsValue) && !isNaN(rowsValue)) {
@@ -150,31 +155,31 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         onReturn($("columns-input"), $("resize-apply"));
         onReturn($("rows-input"), $("resize-apply"));
-        onClick($("resize-cancel"), () => {
+        onClick($("resize-cancel"), function () {
             hideOverlay($("resize-overlay"));
             keyboard.unignore();
             paintShortcuts.unignore();
             freestyle.unignore();
             characterBrush.unignore();
         });
-        onClick($("default-colour"), () => {
+        onClick($("default-colour"), function () {
             palette.setForegroundColour(7);
             palette.setBackgroundColour(0);
         });
-        onClick($("swap-colours"), () => {
+        onClick($("swap-colours"), function () {
             var tempForeground = palette.getForegroundColour();
             palette.setForegroundColour(palette.getBackgroundColour());
             palette.setBackgroundColour(tempForeground);
         });
-        onClick($("fonts"), () => {
+        onClick($("fonts"), function () {
             showOverlay($("fonts-overlay"));
         });
-        onSelectChange($("font-select"), () => {
-            textArtCanvas.setFont($("font-select").value, () => {
+        onSelectChange($("font-select"), function () {
+            textArtCanvas.setFont($("font-select").value, function () {
                 hideOverlay($("fonts-overlay"));
             });
         });
-        onClick($("fonts-cancel"), () => {
+        onClick($("fonts-cancel"), function () {
             hideOverlay($("fonts-overlay"));
         });
         var grid = createGrid($("grid"));
@@ -194,12 +199,12 @@ document.addEventListener("DOMContentLoaded", () => {
         toolPreview = createToolPreview($("tool-preview"));
         var selection = createSelectionTool($("canvas-container"));
         Toolbar.add($("selection"), selection.enable, selection.disable);
-        chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"),() => {
+        chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"), function () {
             keyboard.ignore();
             paintShortcuts.ignore();
             freestyle.ignore();
             characterBrush.ignore();
-        }, () => {
+        }, function () {
             keyboard.unignore();
             paintShortcuts.unignore();
             freestyle.unignore();

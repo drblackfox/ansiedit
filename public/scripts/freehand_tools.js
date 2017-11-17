@@ -1,5 +1,8 @@
+"use strict";
+
 function createPanelCursor(divElement) {
     "use strict";
+
     var cursor = createCanvas(0, 0);
     cursor.classList.add("cursor");
     divElement.appendChild(cursor);
@@ -32,6 +35,7 @@ function createPanelCursor(divElement) {
 
 function createFloatingPanelPalette(width, height) {
     "use strict";
+
     var canvasContainer = document.createElement("DIV");
     var cursor = createPanelCursor(canvasContainer);
     var canvas = createCanvas(width, height);
@@ -56,7 +60,7 @@ function createFloatingPanelPalette(width, height) {
     }
 
     function redrawSwatch(colour) {
-        ctx.putImageData(imageData[colour], (colour % 8) * (width / 8), (colour > 7) ? 0 : (height / 2));
+        ctx.putImageData(imageData[colour], colour % 8 * (width / 8), colour > 7 ? 0 : height / 2);
     }
 
     function redrawSwatches() {
@@ -69,7 +73,7 @@ function createFloatingPanelPalette(width, height) {
         var rect = canvas.getBoundingClientRect();
         var mouseX = evt.clientX - rect.left;
         var mouseY = evt.clientY - rect.top;
-        var colour = Math.floor(mouseX / (width / 8)) + ((mouseY < (height / 2)) ? 8 : 0);
+        var colour = Math.floor(mouseX / (width / 8)) + (mouseY < height / 2 ? 8 : 0);
         if (evt.ctrlKey === false && evt.which != 3) {
             palette.setForegroundColour(colour);
         } else {
@@ -94,7 +98,7 @@ function createFloatingPanelPalette(width, height) {
 
     function updateCursor(colour) {
         cursor.resize(width / 8, height / 2);
-        cursor.setPos((colour % 8) * (width / 8), (colour > 7) ? 0 : (height / 2));
+        cursor.setPos(colour % 8 * (width / 8), colour > 7 ? 0 : height / 2);
     }
 
     function onForegroundChange(evt) {
@@ -115,7 +119,7 @@ function createFloatingPanelPalette(width, height) {
     redrawSwatches();
     updateCursor(palette.getForegroundColour());
     canvas.addEventListener("mousedown", mouseDown);
-    canvas.addEventListener("contextmenu", (evt) => {
+    canvas.addEventListener("contextmenu", function (evt) {
         evt.preventDefault();
     });
     document.addEventListener("onForegroundChange", onForegroundChange);
@@ -132,6 +136,7 @@ function createFloatingPanelPalette(width, height) {
 
 function createFloatingPanel(x, y) {
     "use strict";
+
     var panel = document.createElement("DIV");
     panel.classList.add("floating-panel");
     $("body-container").appendChild(panel);
@@ -194,15 +199,16 @@ function createFloatingPanel(x, y) {
 
 function createFreehandController(panel) {
     "use strict";
+
     var prev = {};
     var drawMode;
 
     function line(x0, y0, x1, y1, callback) {
         var dx = Math.abs(x1 - x0);
-        var sx = (x0 < x1) ? 1 : -1;
+        var sx = x0 < x1 ? 1 : -1;
         var dy = Math.abs(y1 - y0);
-        var sy = (y0 < y1) ? 1 : -1;
-        var err = ((dx > dy) ? dx : -dy) / 2;
+        var sy = y0 < y1 ? 1 : -1;
+        var err = (dx > dy ? dx : -dy) / 2;
         var e2;
 
         while (true) {
@@ -225,27 +231,27 @@ function createFreehandController(panel) {
     function draw(coords) {
         if (prev.x !== coords.x || prev.y !== coords.y || prev.halfBlockY !== coords.halfBlockY) {
             if (drawMode.halfBlockMode === true) {
-                var colour = (coords.leftMouseButton === true) ? palette.getForegroundColour() : palette.getBackgroundColour();
+                var colour = coords.leftMouseButton === true ? palette.getForegroundColour() : palette.getBackgroundColour();
                 if (Math.abs(prev.x - coords.x) > 1 || Math.abs(prev.halfBlockY - coords.halfBlockY) > 1) {
-                    textArtCanvas.drawHalfBlock((callback) => {
-                        line(prev.x, prev.halfBlockY, coords.x, coords.halfBlockY, (x, y) => {
+                    textArtCanvas.drawHalfBlock(function (callback) {
+                        line(prev.x, prev.halfBlockY, coords.x, coords.halfBlockY, function (x, y) {
                             callback(colour, x, y);
                         });
                     });
                 } else {
-                    textArtCanvas.drawHalfBlock((callback) => {
+                    textArtCanvas.drawHalfBlock(function (callback) {
                         callback(colour, coords.x, coords.halfBlockY);
                     });
                 }
             } else {
                 if (Math.abs(prev.x - coords.x) > 1 || Math.abs(prev.y - coords.y) > 1) {
-                    textArtCanvas.draw((callback) => {
-                        line(prev.x, prev.y, coords.x, coords.y, (x, y) => {
+                    textArtCanvas.draw(function (callback) {
+                        line(prev.x, prev.y, coords.x, coords.y, function (x, y) {
                             callback(drawMode.charCode, drawMode.foreground, drawMode.background, x, y);
                         });
                     }, false);
                 } else {
-                    textArtCanvas.draw((callback) => {
+                    textArtCanvas.draw(function (callback) {
                         callback(drawMode.charCode, drawMode.foreground, drawMode.background, coords.x, coords.y);
                     }, false);
                 }
@@ -294,6 +300,7 @@ function createFreehandController(panel) {
 
 function createShadingPanel() {
     "use strict";
+
     var panelWidth = font.getWidth() * 20;
     var panel = createFloatingPanel(50, 30);
     var palettePanel = createFloatingPanelPalette(panelWidth, 40);
@@ -379,31 +386,31 @@ function createShadingPanel() {
 
     function keyDown(evt) {
         if (ignored === false) {
-            var keyCode = (evt.keyCode || evt.which);
+            var keyCode = evt.keyCode || evt.which;
             if (halfBlockMode === false) {
-                switch(keyCode) {
-                case 37:
-                    evt.preventDefault();
-                    x = Math.max(x - 1, 0);
-                    updateCursor();
-                    break;
-                case 38:
-                    evt.preventDefault();
-                    y = Math.max(y - 1, 0);
-                    updateCursor();
-                    break;
-                case 39:
-                    evt.preventDefault();
-                    x = Math.min(x + 1, 4);
-                    updateCursor();
-                    break;
-                case 40:
-                    evt.preventDefault();
-                    y = Math.min(y + 1, 14);
-                    updateCursor();
-                    break;
-                default:
-                    break;
+                switch (keyCode) {
+                    case 37:
+                        evt.preventDefault();
+                        x = Math.max(x - 1, 0);
+                        updateCursor();
+                        break;
+                    case 38:
+                        evt.preventDefault();
+                        y = Math.max(y - 1, 0);
+                        updateCursor();
+                        break;
+                    case 39:
+                        evt.preventDefault();
+                        x = Math.min(x + 1, 4);
+                        updateCursor();
+                        break;
+                    case 40:
+                        evt.preventDefault();
+                        y = Math.min(y + 1, 14);
+                        updateCursor();
+                        break;
+                    default:
+                        break;
                 }
             } else if (keyCode >= 37 && keyCode <= 40) {
                 evt.preventDefault();
@@ -434,13 +441,19 @@ function createShadingPanel() {
 
     function getMode() {
         var charCode = 0;
-        switch(x) {
-            case 0: charCode = 219; break;
-            case 1: charCode = 178; break;
-            case 2: charCode = 177; break;
-            case 3: charCode = 176; break;
-            case 4: charCode = 0; break;
-            default: break;
+        switch (x) {
+            case 0:
+                charCode = 219;break;
+            case 1:
+                charCode = 178;break;
+            case 2:
+                charCode = 177;break;
+            case 3:
+                charCode = 176;break;
+            case 4:
+                charCode = 0;break;
+            default:
+                break;
         }
         var foreground = palette.getForegroundColour();
         var background = y;
@@ -508,6 +521,7 @@ function createShadingPanel() {
 
 function createCharacterBrushPanel() {
     "use strict";
+
     var panelWidth = font.getWidth() * 16;
     var panel = createFloatingPanel(50, 30);
     var palettePanel = createFloatingPanelPalette(panelWidth, 40);
@@ -538,30 +552,30 @@ function createCharacterBrushPanel() {
 
     function keyDown(evt) {
         if (ignored === false) {
-            var keyCode = (evt.keyCode || evt.which);
-            switch(keyCode) {
-            case 37:
-                evt.preventDefault();
-                x = Math.max(x - 1, 0);
-                updateCursor();
-                break;
-            case 38:
-                evt.preventDefault();
-                y = Math.max(y - 1, 0);
-                updateCursor();
-                break;
-            case 39:
-                evt.preventDefault();
-                x = Math.min(x + 1, 15);
-                updateCursor();
-                break;
-            case 40:
-                evt.preventDefault();
-                y = Math.min(y + 1, 15);
-                updateCursor();
-                break;
-            default:
-                break;
+            var keyCode = evt.keyCode || evt.which;
+            switch (keyCode) {
+                case 37:
+                    evt.preventDefault();
+                    x = Math.max(x - 1, 0);
+                    updateCursor();
+                    break;
+                case 38:
+                    evt.preventDefault();
+                    y = Math.max(y - 1, 0);
+                    updateCursor();
+                    break;
+                case 39:
+                    evt.preventDefault();
+                    x = Math.min(x + 1, 15);
+                    updateCursor();
+                    break;
+                case 40:
+                    evt.preventDefault();
+                    y = Math.min(y + 1, 15);
+                    updateCursor();
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -647,7 +661,7 @@ function createFillController() {
     function fillPoint(evt) {
         var block = textArtCanvas.getHalfBlock(evt.detail.x, evt.detail.halfBlockY);
         if (block.isBlocky) {
-            var targetColour = (block.halfBlockY === 0) ? block.upperBlockColour : block.lowerBlockColour;
+            var targetColour = block.halfBlockY === 0 ? block.upperBlockColour : block.lowerBlockColour;
             var fillColour = palette.getForegroundColour();
             if (targetColour !== fillColour) {
                 var columns = textArtCanvas.getColumns();
@@ -655,11 +669,11 @@ function createFillController() {
                 var coord = [evt.detail.x, evt.detail.halfBlockY];
                 var queue = [coord];
                 textArtCanvas.startUndo();
-                textArtCanvas.drawHalfBlock((callback) => {
+                textArtCanvas.drawHalfBlock(function (callback) {
                     while (queue.length !== 0) {
                         coord = queue.pop();
                         block = textArtCanvas.getHalfBlock(coord[0], coord[1]);
-                        if (block.isBlocky && (((block.halfBlockY === 0) && (block.upperBlockColour === targetColour)) || ((block.halfBlockY === 1) && (block.lowerBlockColour === targetColour)))) {
+                        if (block.isBlocky && (block.halfBlockY === 0 && block.upperBlockColour === targetColour || block.halfBlockY === 1 && block.lowerBlockColour === targetColour)) {
                             callback(fillColour, coord[0], coord[1]);
                             if (coord[0] > 0) {
                                 queue.push([coord[0] - 1, coord[1], 0]);
@@ -741,6 +755,7 @@ function createFillController() {
 
 function createLineController() {
     "use strict";
+
     var startXY;
     var endXY;
 
@@ -750,10 +765,10 @@ function createLineController() {
 
     function line(x0, y0, x1, y1, callback) {
         var dx = Math.abs(x1 - x0);
-        var sx = (x0 < x1) ? 1 : -1;
+        var sx = x0 < x1 ? 1 : -1;
         var dy = Math.abs(y1 - y0);
-        var sy = (y0 < y1) ? 1 : -1;
-        var err = ((dx > dy) ? dx : -dy) / 2;
+        var sy = y0 < y1 ? 1 : -1;
+        var err = (dx > dy ? dx : -dy) / 2;
         var e2;
 
         while (true) {
@@ -777,7 +792,7 @@ function createLineController() {
         toolPreview.clear();
         var foreground = palette.getForegroundColour();
         textArtCanvas.startUndo();
-        textArtCanvas.drawHalfBlock((draw) => {
+        textArtCanvas.drawHalfBlock(function (draw) {
             line(startXY.x, startXY.halfBlockY, endXY.x, endXY.halfBlockY, function (lineX, lineY) {
                 draw(foreground, lineX, lineY);
             });
@@ -788,7 +803,7 @@ function createLineController() {
 
     function canvasDrag(evt) {
         if (startXY !== undefined) {
-            if (endXY === undefined || (evt.detail.x !== endXY.x || evt.detail.y !== endXY.y || evt.detail.halfBlockY !== endXY.halfBlockY)) {
+            if (endXY === undefined || evt.detail.x !== endXY.x || evt.detail.y !== endXY.y || evt.detail.halfBlockY !== endXY.halfBlockY) {
                 if (endXY !== undefined) {
                     toolPreview.clear();
                 }
@@ -821,14 +836,15 @@ function createLineController() {
 
 function createSquareController() {
     "use strict";
+
     var panel = createFloatingPanel(50, 30);
     var palettePanel = createFloatingPanelPalette(160, 40);
     var startXY;
     var endXY;
     var outlineMode = true;
-    var outlineToggle = createToggleButton("Outline", "Filled", () => {
+    var outlineToggle = createToggleButton("Outline", "Filled", function () {
         outlineMode = true;
-    }, () => {
+    }, function () {
         outlineMode = false;
     });
 
@@ -852,7 +868,7 @@ function createSquareController() {
             y0 = endXY.halfBlockY;
             y1 = startXY.halfBlockY;
         }
-        return {"x0": x0, "y0": y0, "x1": x1, "y1": y1};
+        return { "x0": x0, "y0": y0, "x1": x1, "y1": y1 };
     }
 
     function canvasUp() {
@@ -860,7 +876,7 @@ function createSquareController() {
         var coords = processCoords();
         var foreground = palette.getForegroundColour();
         textArtCanvas.startUndo();
-        textArtCanvas.drawHalfBlock((draw) => {
+        textArtCanvas.drawHalfBlock(function (draw) {
             if (outlineMode === true) {
                 for (var px = coords.x0; px <= coords.x1; px++) {
                     draw(foreground, px, coords.y0);
@@ -942,14 +958,15 @@ function createSquareController() {
 
 function createCircleController() {
     "use strict";
+
     var panel = createFloatingPanel(50, 30);
     var palettePanel = createFloatingPanelPalette(160, 40);
     var startXY;
     var endXY;
     var outlineMode = true;
-    var outlineToggle = createToggleButton("Outline", "Filled", () => {
+    var outlineToggle = createToggleButton("Outline", "Filled", function () {
         outlineMode = true;
-    }, () => {
+    }, function () {
         outlineMode = false;
     });
 
@@ -985,7 +1002,7 @@ function createCircleController() {
                 sigma += fa2 * (1 - py);
                 py -= 1;
             }
-            sigma += b2 * ((4 * px) + 6);
+            sigma += b2 * (4 * px + 6);
         }
         for (var px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
             callback(sx + px, sy + py);
@@ -996,7 +1013,7 @@ function createCircleController() {
                 sigma += fb2 * (1 - px);
                 px -= 1;
             }
-            sigma += a2 * ((4 * py) + 6);
+            sigma += a2 * (4 * py + 6);
         }
     }
 
@@ -1018,7 +1035,7 @@ function createCircleController() {
                 sigma += fa2 * (1 - py);
                 py -= 1;
             }
-            sigma += b2 * ((4 * px) + 6);
+            sigma += b2 * (4 * px + 6);
         }
         for (var px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
             var amount = px * 2;
@@ -1033,7 +1050,7 @@ function createCircleController() {
                 sigma += fb2 * (1 - px);
                 px -= 1;
             }
-            sigma += a2 * ((4 * py) + 6);
+            sigma += a2 * (4 * py + 6);
         }
     }
 
@@ -1045,15 +1062,15 @@ function createCircleController() {
         var columns = textArtCanvas.getColumns();
         var rows = textArtCanvas.getRows();
         var doubleRows = rows * 2;
-        textArtCanvas.drawHalfBlock((draw) => {
+        textArtCanvas.drawHalfBlock(function (draw) {
             if (outlineMode === true) {
-                ellipseOutline(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
+                ellipseOutline(coords.sx, coords.sy, coords.width, coords.height, function (px, py) {
                     if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
                         draw(foreground, px, py);
                     }
                 });
             } else {
-                ellipseFilled(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
+                ellipseFilled(coords.sx, coords.sy, coords.width, coords.height, function (px, py) {
                     if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
                         draw(foreground, px, py);
                     }
@@ -1077,13 +1094,13 @@ function createCircleController() {
                 var rows = textArtCanvas.getRows();
                 var doubleRows = rows * 2;
                 if (outlineMode === true) {
-                    ellipseOutline(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
+                    ellipseOutline(coords.sx, coords.sy, coords.width, coords.height, function (px, py) {
                         if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
                             toolPreview.drawHalfBlock(foreground, px, py);
                         }
                     });
                 } else {
-                    ellipseFilled(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
+                    ellipseFilled(coords.sx, coords.sy, coords.width, coords.height, function (px, py) {
                         if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
                             toolPreview.drawHalfBlock(foreground, px, py);
                         }
@@ -1168,6 +1185,7 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 
 function createSelectionTool(divElement) {
     "use strict";
+
     function canvasDown(evt) {
         selectionCursor.setStart(evt.detail.x, evt.detail.y);
         selectionCursor.setEnd(evt.detail.x, evt.detail.y);

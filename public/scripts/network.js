@@ -1,5 +1,8 @@
+"use strict";
+
 function createWorkerHandler(inputHandle) {
     "use strict";
+
     var worker = new Worker("scripts/worker.js");
     var handle = localStorage.getItem("handle");
     if (handle === null) {
@@ -8,7 +11,7 @@ function createWorkerHandler(inputHandle) {
     }
     inputHandle.value = handle;
     var connected = false;
-    worker.postMessage({"cmd": "handle", "handle": handle});
+    worker.postMessage({ "cmd": "handle", "handle": handle });
     showOverlay($("websocket-overlay"));
 
     function onConnected() {
@@ -21,7 +24,7 @@ function createWorkerHandler(inputHandle) {
             includedElement[i].style.display = "block";
         }
         title.setName(window.location.hostname);
-        worker.postMessage({"cmd": "join", "handle": handle});
+        worker.postMessage({ "cmd": "join", "handle": handle });
         connected = true;
     }
 
@@ -61,48 +64,48 @@ function createWorkerHandler(inputHandle) {
 
     function onMessage(msg) {
         var data = msg.data;
-        switch(data.cmd) {
-        case "connected":
-            onConnected();
-            break;
-        case "disconnected":
-            onDisconnected();
-            break;
-        case "imageData":
-            onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColours, data.letterSpacing);
-            break;
-        case "chat":
-            onChat(data.handle, data.text, data.showNotification);
-            break;
-        case "join":
-            onJoin(data.handle, data.sessionID, data.showNotification);
-            break;
-        case "part":
-            onPart(data.sessionID);
-            break;
-        case "nick":
-            onNick(data.handle, data.sessionID, data.showNotification);
-            break;
-        case "draw":
-            onDraw(data.blocks);
-            break;
+        switch (data.cmd) {
+            case "connected":
+                onConnected();
+                break;
+            case "disconnected":
+                onDisconnected();
+                break;
+            case "imageData":
+                onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColours, data.letterSpacing);
+                break;
+            case "chat":
+                onChat(data.handle, data.text, data.showNotification);
+                break;
+            case "join":
+                onJoin(data.handle, data.sessionID, data.showNotification);
+                break;
+            case "part":
+                onPart(data.sessionID);
+                break;
+            case "nick":
+                onNick(data.handle, data.sessionID, data.showNotification);
+                break;
+            case "draw":
+                onDraw(data.blocks);
+                break;
         }
     }
 
     function draw(blocks) {
-        worker.postMessage({"cmd": "draw", "blocks": blocks});
+        worker.postMessage({ "cmd": "draw", "blocks": blocks });
     }
 
     function setHandle(newHandle) {
         if (handle !== newHandle) {
             handle = newHandle;
             localStorage.setItem("handle", handle);
-            worker.postMessage({"cmd": "nick", "handle": handle});
+            worker.postMessage({ "cmd": "nick", "handle": handle });
         }
     }
 
     function sendChat(text) {
-        worker.postMessage({"cmd": "chat", "text": text});
+        worker.postMessage({ "cmd": "chat", "text": text });
     }
 
     function isConnected() {
@@ -110,7 +113,7 @@ function createWorkerHandler(inputHandle) {
     }
 
     worker.addEventListener("message", onMessage);
-    worker.postMessage({"cmd": "connect", "url": "ws://" + window.location.hostname + ":" + window.location.port + window.location.pathname});
+    worker.postMessage({ "cmd": "connect", "url": "ws://" + window.location.hostname + ":" + window.location.port + window.location.pathname });
 
     return {
         "draw": draw,
@@ -122,6 +125,7 @@ function createWorkerHandler(inputHandle) {
 
 function createChatController(divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback) {
     "use strict";
+
     var enabled = false;
     var userList = {};
     var notifications = localStorage.getItem("notifications");
@@ -143,7 +147,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
             "body": text,
             "icon": "../images/face.png"
         });
-        setTimeout(() => {
+        setTimeout(function () {
             notification.close();
         }, 7000);
     }
@@ -161,7 +165,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
         div.appendChild(spanSeperator);
         div.appendChild(spanText);
         var rect = divMessageWindow.getBoundingClientRect();
-        var doScroll = (rect.height > divMessageWindow.scrollHeight) || (divMessageWindow.scrollTop === divMessageWindow.scrollHeight - rect.height);
+        var doScroll = rect.height > divMessageWindow.scrollHeight || divMessageWindow.scrollTop === divMessageWindow.scrollHeight - rect.height;
         divMessageWindow.appendChild(div);
         if (doScroll) {
             scrollToBottom();
@@ -187,14 +191,14 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
     }
 
     function keypressHandle(evt) {
-        var keyCode = (evt.keyCode || evt.which);
+        var keyCode = evt.keyCode || evt.which;
         if (keyCode === 13) {
             inputMessage.focus();
         }
     }
 
     function keypressMessage(evt) {
-        var keyCode = (evt.keyCode || evt.which);
+        var keyCode = evt.keyCode || evt.which;
         if (keyCode === 13) {
             if (inputMessage.value !== "") {
                 var text = inputMessage.value;
@@ -238,7 +242,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
             if (notifications === true && showNotification === true) {
                 newNotification(handle + " has joined");
             }
-            userList[sessionID] = {"handle": handle, "div": document.createElement("DIV")};
+            userList[sessionID] = { "handle": handle, "div": document.createElement("DIV") };
             userList[sessionID].div.classList.add("user-name");
             userList[sessionID].div.textContent = handle;
             divUserList.appendChild(userList[sessionID].div);
@@ -266,7 +270,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
     }
 
     function globalToggleKeydown(evt) {
-        var keyCode = (evt.keyCode || evt.which);
+        var keyCode = evt.keyCode || evt.which;
         if (keyCode === 27) {
             toggle();
         }
@@ -275,7 +279,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
     function notificationCheckboxClicked(evt) {
         if (inputNotificationCheckbox.checked) {
             if (Notification.permission !== "granted") {
-                Notification.requestPermission((permission) => {
+                Notification.requestPermission(function (permission) {
                     notifications = true;
                     localStorage.setItem("notifications", notifications);
                 });
